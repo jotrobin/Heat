@@ -23,7 +23,7 @@ parameters:
    label: SSH key to login
    description: Authentication purposes
    type: string
-   default: trainin_bilal
+   default: keyname
 
  public_network_name:
    label: Name of public networks
