@@ -1,0 +1,93 @@
+heat_template_version: 2016-04-08
+
+description: >
+  Deploys a new instance
+
+parameters:
+
+ image:
+   label: image
+   description: Test Image
+   type: string
+   default: OL73-IPv4-CLI-training-only
+
+
+ flavour:
+   label: Instance Flavor
+   description: Defines the flavor of image
+   type: string
+   default: m1.large
+
+
+ ssh_key:
+   label: SSH key to login
+   description: Authentication purposes
+   type: string
+   default: trainin_bilal
+
+ public_network_name:
+   label: Name of public networks
+   description: Defines the network to be used
+   type: string
+   default: ext-net
+
+ network_name:
+    label: Network Name
+    type: string
+    default: netrobin_stack
+
+ subnet_name:
+    label: Subnet Name
+    type: string
+    default: subnetrobin_stack
+
+ router_name:
+    label: Router Name
+    type: string
+    default: router_robin_stack
+
+
+
+resources:
+
+  router:
+    type: OS::Neutron::Router
+    properties:
+      name: { get_param: router_name }
+      external_gateway_info:
+        network: { get_param: public_network_name }
+
+
+  net:
+    type: OS::Neutron::Net
+    properties:
+      name: { get_param: network_name }
+
+
+  subnet:
+    type: OS::Neutron::Subnet
+    properties:
+      name: { get_param: subnet_name }
+      cidr: 192.168.20.1/24
+      enable_dhcp: true
+      dns_nameservers:
+        - 10.75.137.245
+      network_id: { get_resource: net }
+
+  router_interface_add:
+    type: OS::Neutron::RouterInterface
+    properties:
+      router_id: { get_resource: router }
+      subnet_id: { get_resource: subnet }
+
+
+
+  my_instance:
+    type: OS::Nova::Server
+    properties:
+      name: Robin's_Server_stack
+      key_name: {get_param: ssh_key}
+      image: {get_param: image}
+      flavor: {get_param: flavour}
+      networks:
+        - network: {get_resource: net}
